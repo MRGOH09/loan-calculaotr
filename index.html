@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>车贷计算器网页 (RM)</title>
+    <!-- 引入 Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- 引入 Inter 和 Noto Sans SC 字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* 使用 Noto Sans SC 作为中文字体，Inter 作为后备 */
+        body {
+            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+        }
+        /* 为输入框数字设置右对齐，更符合习惯 */
+        input[type=number] {
+            text-align: right;
+        }
+        /* 隐藏 input[type=number] 的上下箭头 */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <!-- 主视觉图区域 -->
+        <div class="relative w-full h-64 md:h-80 mb-8 rounded-2xl overflow-hidden shadow-lg">
+            <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=2070&auto=format&fit=crop" 
+                 alt="一辆现代汽车的特写" 
+                 class="w-full h-full object-cover"
+                 onerror="this.onerror=null;this.src='https://placehold.co/1200x400/334155/e2e8f0?text=汽车图片';">
+            <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                <h1 class="text-3xl md:text-5xl font-bold text-white text-center px-4">您的梦想座驾，轻松计算</h1>
+            </div>
+        </div>
+
+        <!-- 计算器主体 -->
+        <div class="w-full max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-6 md:p-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- 左侧：输入区域 -->
+            <div class="space-y-6">
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-bold text-gray-800">车贷计算器</h2>
+                    <p class="text-gray-500 mt-2">输入您的贷款信息，轻松计算月供和总成本。</p>
+                </div>
+
+                <!-- 输入表单 -->
+                <div class="space-y-4">
+                    <div>
+                        <label for="carPrice" class="block text-sm font-medium text-gray-700">车辆价格 (RM)</label>
+                        <div class="mt-1 relative rounded-md shadow-sm">
+                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                <span class="text-gray-500 sm:text-sm">RM</span>
+                            </div>
+                            <input type="number" id="carPrice" class="block w-full rounded-md border-gray-300 pl-9 pr-4 py-2 focus:border-indigo-500 focus:ring-indigo-500" placeholder="例如: 85000" value="85000">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="downPayment" class="block text-sm font-medium text-gray-700">首付金额 (RM)</label>
+                         <div class="mt-1 relative rounded-md shadow-sm">
+                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                <span class="text-gray-500 sm:text-sm">RM</span>
+                            </div>
+                            <input type="number" id="downPayment" class="block w-full rounded-md border-gray-300 pl-9 pr-4 py-2 focus:border-indigo-500 focus:ring-indigo-500" placeholder="例如: 8500" value="8500">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="loanTerm" class="block text-sm font-medium text-gray-700">贷款期限 (年)</label>
+                        <select id="loanTerm" class="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500">
+                            <option>3</option>
+                            <option>5</option>
+                            <option>7</option>
+                            <option selected>9</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="interestRate" class="block text-sm font-medium text-gray-700">年利率 (%)</label>
+                        <div class="mt-1 relative rounded-md shadow-sm">
+                             <input type="number" id="interestRate" class="block w-full rounded-md border-gray-300 pr-8 pl-4 py-2 focus:border-indigo-500 focus:ring-indigo-500" placeholder="例如: 3.5" value="3.5">
+                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                <span class="text-gray-500 sm:text-sm">%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                 <!-- 计算按钮 -->
+                <button id="calculateBtn" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300">
+                    计算
+                </button>
+            </div>
+
+            <!-- 右侧：结果和图表 -->
+            <div class="bg-gray-50 rounded-xl p-6 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">计算结果</h3>
+                    <div class="space-y-4">
+                        <!-- 每月还款 -->
+                        <div class="flex justify-between items-center">
+                            <p class="text-gray-600">每月还款</p>
+                            <p id="monthlyPayment" class="text-2xl font-bold text-indigo-600">RM 0.00</p>
+                        </div>
+                        <hr>
+                        <!-- 总支付利息 -->
+                        <div class="flex justify-between items-center">
+                            <p class="text-gray-600">总支付利息</p>
+                            <p id="totalInterest" class="text-lg font-semibold text-gray-800">RM 0.00</p>
+                        </div>
+                        <!-- 还款总额 -->
+                        <div class="flex justify-between items-center">
+                            <p class="text-gray-600">还款总额</p>
+                            <p id="totalPayment" class="text-lg font-semibold text-gray-800">RM 0.00</p>
+                        </div>
+                         <!-- 贷款本金 -->
+                        <div class="flex justify-between items-center">
+                            <p class="text-gray-600">贷款本金</p>
+                            <p id="loanPrincipal" class="text-lg font-semibold text-gray-800">RM 0.00</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- 图表容器 -->
+                <div class="mt-6">
+                    <canvas id="paymentChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 页脚 -->
+        <footer class="text-center mt-8 text-gray-500 text-sm">
+            <p>&copy; 2025 车贷计算器。保留所有权利。</p>
+            <p class="mt-1">仅供参考，具体贷款条件请咨询您的银行。</p>
+        </footer>
+    </div>
+
+    <script>
+        // 获取所有需要的DOM元素
+        const carPriceInput = document.getElementById('carPrice');
+        const downPaymentInput = document.getElementById('downPayment');
+        const loanTermInput = document.getElementById('loanTerm');
+        const interestRateInput = document.getElementById('interestRate');
+        const calculateBtn = document.getElementById('calculateBtn');
+
+        const monthlyPaymentEl = document.getElementById('monthlyPayment');
+        const totalInterestEl = document.getElementById('totalInterest');
+        const totalPaymentEl = document.getElementById('totalPayment');
+        const loanPrincipalEl = document.getElementById('loanPrincipal');
+
+        const chartCtx = document.getElementById('paymentChart').getContext('2d');
+        let paymentChart;
+
+        /**
+         * 初始化或更新饼图
+         * @param {number} principal - 贷款本金
+         * @param {number} interest - 总利息
+         */
+        function createOrUpdateChart(principal, interest) {
+            const data = {
+                labels: ['贷款本金', '总利息'],
+                datasets: [{
+                    data: [principal, interest],
+                    backgroundColor: [
+                        'rgb(79, 70, 229)', // indigo-600
+                        'rgb(165, 180, 252)' // indigo-300
+                    ],
+                    hoverOffset: 4,
+                    borderWidth: 0,
+                }]
+            };
+
+            const options = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: {
+                                family: "'Inter', 'Noto Sans SC', sans-serif"
+                            }
+                        }
+                    },
+                    tooltip: {
+                         callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed !== null) {
+                                    label += new Intl.NumberFormat('ms-MY', { style: 'currency', currency: 'MYR' }).format(context.parsed);
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            };
+
+            // 如果图表实例已存在，则更新数据并刷新
+            if (paymentChart) {
+                paymentChart.data.labels = ['贷款本金', '总利息'];
+                paymentChart.data.datasets[0].data = [principal, interest];
+                paymentChart.update();
+            } else { // 否则，创建新图表
+                paymentChart = new Chart(chartCtx, {
+                    type: 'doughnut',
+                    data: data,
+                    options: options
+                });
+            }
+        }
+
+        /**
+         * 格式化货币
+         * @param {number} amount - 金额
+         * @returns {string} - 格式化后的字符串
+         */
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('ms-MY', {
+                style: 'currency',
+                currency: 'MYR',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(amount);
+        }
+
+        /**
+         * 执行计算逻辑
+         */
+        function calculateLoan() {
+            // 1. 获取输入值并转换为数字
+            const carPrice = parseFloat(carPriceInput.value) || 0;
+            const downPayment = parseFloat(downPaymentInput.value) || 0;
+            const loanTermYears = parseInt(loanTermInput.value);
+            const annualInterestRate = parseFloat(interestRateInput.value) || 0;
+
+            // 2. 输入验证
+            if (carPrice <= 0 || downPayment < 0 || annualInterestRate < 0 || carPrice <= downPayment) {
+                console.error("请输入有效的车辆价格和首付金额。车辆价格必须大于首付。");
+                return;
+            }
+
+            // 3. 计算核心参数
+            const principal = carPrice - downPayment; // 贷款本金
+            
+            // 4. 计算月供 (固定利率)
+            const totalInterest = principal * (annualInterestRate / 100) * loanTermYears;
+            const totalPayment = principal + totalInterest;
+            const monthlyPayment = totalPayment / (loanTermYears * 12);
+            
+            // 5. 更新界面显示
+            monthlyPaymentEl.textContent = formatCurrency(monthlyPayment);
+            totalInterestEl.textContent = formatCurrency(totalInterest);
+            totalPaymentEl.textContent = formatCurrency(totalPayment);
+            loanPrincipalEl.textContent = formatCurrency(principal);
+
+            // 6. 更新图表
+            createOrUpdateChart(principal, totalInterest);
+        }
+
+        // 绑定事件监听
+        calculateBtn.addEventListener('click', calculateLoan);
+
+        // 页面加载后立即执行一次计算
+        window.addEventListener('load', calculateLoan);
+
+    </script>
+</body>
+</html>
